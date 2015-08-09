@@ -45,12 +45,13 @@ RotorClearanceSpacing = 2;				// Extra spacing to be added to provide clearance
 
 FaceHeight = 3;
 
-HousingOuterFrameThickness = 4;
+HousingOuterFrameThickness = 3;
 
 
 // -- Hose Reference Values
 
 HoseCircumference = 9.5;
+HoseDiameter = 4.25;
 HoseCompressedWidth = 3;					// Width of hose when compressed
 HoseCompressedHeight = 16;					// Height of hose when compressed
 
@@ -67,7 +68,7 @@ EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 // --------------------------------------------------------------------------------------------------------------------
 
 DefaultConvexity = 10;
-DefaultSegments = 32;
+DefaultSegments = 24;
 
 ShowHardware=true;
 ShowHose=true;
@@ -84,28 +85,27 @@ if (ShowReferenceSTL == true) {
 	import("Casing_Reference.stl", convexity=DefaultConvexity);
 }
 
-housing_guide(false, true);
+housing_LowerComponent();
 
-color([0,0,1])
-housing_guide();
+color([0,1,1])
+translate([0, innerWallDiameter, 0])
+cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
 
+module housing_LowerComponent() {
+	intersection() {
+		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+			housingProfile_Main();
 
-module housing_guide(_partialRotate = true, _noExtrude = false) {
-	innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
-	innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
+		translate([0 - (innerWallDiameter + innerWallThickness), 0 - (innerWallDiameter + innerWallThickness), 0])
+			cube(size=[innerWallDiameter + innerWallThickness, (innerWallDiameter + innerWallThickness) * 2, innerWallHeight], center = false);
+	}
 	
-	if (_noExtrude == false) {
-		if (_partialRotate == true) {
-			partial_rotate_extrude(180, 0, DefaultConvexity)
-			housingProfile_Main();
-		} 
-		else {
-			rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
-			housingProfile_Main();
-		}
-	} 
-	else {
-		housingProfile_Main();
+	intersection() {
+		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+			housingProfile_HoseSide();
+
+		translate([0, 0 - (innerWallDiameter + innerWallThickness), 0])
+			cube(size=[innerWallDiameter + innerWallThickness, (innerWallDiameter + innerWallThickness) * 2, innerWallHeight], center = false);
 	}
 }
 
@@ -114,21 +114,44 @@ module housing_guide(_partialRotate = true, _noExtrude = false) {
 // Pump housing
 // ====================================================================================================================
 
+innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
+innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
+innerWallThickness = HousingOuterFrameThickness;
+
+supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
+supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
+supportChannelThickness = innerWallDiameter - supportChannelDiameter;
+
+faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
+faceEdgeHeight = RotorClearanceSpacing;
+faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
+
 // Support Channel
 // --------------------------------------------------------------------------------------------------------------------
 // This part creates a channel to contain the hose whilst providing clearance for the rotor assembly
 // Two squares with a circle at the edge provide a rounded camber 
 
-module housingProfile_SupportChannel(supportChannelDiameter, supportChannelHeight, supportChannelThickness) {
+module housingProfile_SupportChannel(_SupportChannelHeight = supportChannelHeight) {
 
+	// main support
 	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), 0, 0])
-		square([supportChannelThickness, supportChannelHeight],center=false);
+		square([supportChannelThickness - RotorClearanceSpacing, supportChannelHeight],center=false);
 	
+	// lower portion of main support
 	translate([supportChannelDiameter, 0, 0])
-		square([supportChannelThickness, supportChannelHeight - (RotorClearanceSpacing / 2)],center=false);
-			
+		square([RotorClearanceSpacing, supportChannelHeight - (RotorClearanceSpacing / 2)],center=false);
+	
+	// outside curved edge for main support	
 	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), supportChannelHeight - (RotorClearanceSpacing / 2), 0])
 		circle(d = RotorClearanceSpacing, $fn= DefaultSegments / 4, center=false);
+	
+	// inner edge between the support channel and the Outer Frame
+	difference() {
+		translate([supportChannelDiameter + supportChannelThickness - (RotorClearanceSpacing / 2), 0, 0])
+			square([RotorClearanceSpacing, supportChannelHeight + (RotorClearanceSpacing / 2)],center=false);
+		translate([supportChannelDiameter + supportChannelThickness - (RotorClearanceSpacing / 2), supportChannelHeight + (RotorClearanceSpacing / 2), 0])
+			circle(d = RotorClearanceSpacing, $fn= DefaultSegments / 4, center=false);
+	}
 
 }
 
@@ -137,42 +160,44 @@ module housingProfile_SupportChannel(supportChannelDiameter, supportChannelHeigh
 // This part forms an inner wall large enough for the hose to be fully compressed by the rollers
 // it also provides the outside edge of the housing
 
-module housingProfile_OuterFrame(_innerWallDiameter, _innerWallHeight, _innerWallThickness) {
-	translate([_innerWallDiameter, 0, 0])
-		square([_innerWallThickness, _innerWallHeight],center=false);
+module housingProfile_OuterFrame() {
+	translate([innerWallDiameter, 0, 0])
+		square([innerWallThickness, innerWallHeight],center=false);
 
 }
 
 // Inner Edge
 // --------------------------------------------------------------------------------------------------------------------
 
-module housingProfile_InnerEdge(faceEdgeDiameter, faceEdgeHeight, faceEdgeThickness) {
-	translate([faceEdgeDiameter, 0, 0])
-		square([faceEdgeThickness, faceEdgeHeight],center=false); 
+module housingProfile_InnerEdge() {
+
+	difference() {
+		translate([faceEdgeDiameter, 0, 0])
+			square([faceEdgeThickness, faceEdgeHeight + (RotorClearanceSpacing / 2)],center=false);
+		translate([faceEdgeDiameter, faceEdgeHeight, 0])
+			square([RotorClearanceSpacing / 2, faceEdgeHeight + RotorClearanceSpacing],center=false);
+		translate([faceEdgeDiameter + faceEdgeThickness - (RotorClearanceSpacing / 2), faceEdgeHeight + (RotorClearanceSpacing / 2), 0])
+			circle(d = RotorClearanceSpacing, $fn= DefaultSegments / 4, center=false);
+	}		
 }
 
 // Main Profile rendering module
 // --------------------------------------------------------------------------------------------------------------------
 
 module housingProfile_Main() {
-	innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
-	innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
-	innerWallThickness = HousingOuterFrameThickness;
-
-	supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
-	supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
-	supportChannelThickness = innerWallDiameter - supportChannelDiameter;
-
-	faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
-	faceEdgeHeight = RotorClearanceSpacing;
-	faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
-	
 	// Render Sections of profile
 	
-	housingProfile_SupportChannel(supportChannelDiameter, supportChannelHeight, supportChannelThickness);
-	housingProfile_OuterFrame(innerWallDiameter, innerWallHeight, innerWallThickness);
-	housingProfile_InnerEdge(faceEdgeDiameter, faceEdgeHeight, faceEdgeThickness);
+	housingProfile_SupportChannel(supportChannelDiameter);
+	housingProfile_OuterFrame();
+	housingProfile_InnerEdge();
+}
 
+module housingProfile_HoseSide() {
+	// Render Sections of profile
+	
+	housingProfile_SupportChannel();
+	housingProfile_OuterFrame();
+	housingProfile_InnerEdge();
 }
         
         
