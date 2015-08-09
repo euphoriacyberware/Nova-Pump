@@ -3,6 +3,8 @@
 // Looking to make the repeated curved shape work easier via openscad
 // ********************************************************************************************************************
 
+include <partial_rotate_extrude.scad>;
+
 // --------------------------------------------------------------------------------------------------------------------
 // Hardware Settings 
 // --------------------------------------------------------------------------------------------------------------------
@@ -65,7 +67,7 @@ EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 // --------------------------------------------------------------------------------------------------------------------
 
 DefaultConvexity = 10;
-DefaultSegments = 64;
+DefaultSegments = 32;
 
 ShowHardware=true;
 ShowHose=true;
@@ -82,51 +84,96 @@ if (ShowReferenceSTL == true) {
 	import("Casing_Reference.stl", convexity=DefaultConvexity);
 }
 
-// Test Pump Housing
+housing_guide(false, true);
+
+color([0,0,1])
+housing_guide();
+
+
+module housing_guide(_partialRotate = true, _noExtrude = false) {
+	innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
+	innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
+	
+	if (_noExtrude == false) {
+		if (_partialRotate == true) {
+			partial_rotate_extrude(180, 0, DefaultConvexity)
+			housingProfile_Main();
+		} 
+		else {
+			rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+			housingProfile_Main();
+		}
+	} 
+	else {
+		housingProfile_Main();
+	}
+}
+
+
 // --------------------------------------------------------------------------------------------------------------------
+// Pump housing
+// ====================================================================================================================
 
-innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
-innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
-innerWallThickness = HousingOuterFrameThickness;
-
-supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
-supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
-supportChannelThickness = innerWallDiameter - supportChannelDiameter;
-
-faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
-faceEdgeHeight = RotorClearanceSpacing;
-faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
-
-// -- Housing - Outer Frame
-// This part forms an inner wall large enough for the hose to be fully compressed by the rollers
-
-rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
-	translate([innerWallDiameter, 0, 0])
-		square([innerWallThickness, innerWallHeight],center=false);
-        
-// -- Housing - Support for tubing      
+// Support Channel
+// --------------------------------------------------------------------------------------------------------------------
 // This part creates a channel to contain the hose whilst providing clearance for the rotor assembly
 // Two squares with a circle at the edge provide a rounded camber 
 
-rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
+module housingProfile_SupportChannel(supportChannelDiameter, supportChannelHeight, supportChannelThickness) {
+
 	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), 0, 0])
 		square([supportChannelThickness, supportChannelHeight],center=false);
 	
-rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
 	translate([supportChannelDiameter, 0, 0])
 		square([supportChannelThickness, supportChannelHeight - (RotorClearanceSpacing / 2)],center=false);
 			
-translate([0,0,supportChannelHeight - (RotorClearanceSpacing / 2)]) {
-	rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
-        translate([supportChannelDiameter + (RotorClearanceSpacing / 2), 0, 0])
-        	circle(d = RotorClearanceSpacing, $fn= DefaultSegments, center=false);
-}
-       	
-// -- Housing - Facing
+	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), supportChannelHeight - (RotorClearanceSpacing / 2), 0])
+		circle(d = RotorClearanceSpacing, $fn= DefaultSegments / 4, center=false);
 
-rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) translate([faceEdgeDiameter, 0, 0])
-	square([faceEdgeThickness, faceEdgeHeight],center=false); 
-        
+}
+
+// Outer Frame
+// --------------------------------------------------------------------------------------------------------------------
+// This part forms an inner wall large enough for the hose to be fully compressed by the rollers
+// it also provides the outside edge of the housing
+
+module housingProfile_OuterFrame(_innerWallDiameter, _innerWallHeight, _innerWallThickness) {
+	translate([_innerWallDiameter, 0, 0])
+		square([_innerWallThickness, _innerWallHeight],center=false);
+
+}
+
+// Inner Edge
+// --------------------------------------------------------------------------------------------------------------------
+
+module housingProfile_InnerEdge(faceEdgeDiameter, faceEdgeHeight, faceEdgeThickness) {
+	translate([faceEdgeDiameter, 0, 0])
+		square([faceEdgeThickness, faceEdgeHeight],center=false); 
+}
+
+// Main Profile rendering module
+// --------------------------------------------------------------------------------------------------------------------
+
+module housingProfile_Main() {
+	innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
+	innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
+	innerWallThickness = HousingOuterFrameThickness;
+
+	supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
+	supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
+	supportChannelThickness = innerWallDiameter - supportChannelDiameter;
+
+	faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
+	faceEdgeHeight = RotorClearanceSpacing;
+	faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
+	
+	// Render Sections of profile
+	
+	housingProfile_SupportChannel(supportChannelDiameter, supportChannelHeight, supportChannelThickness);
+	housingProfile_OuterFrame(innerWallDiameter, innerWallHeight, innerWallThickness);
+	housingProfile_InnerEdge(faceEdgeDiameter, faceEdgeHeight, faceEdgeThickness);
+
+}
         
         
 // ********************************************************************************************************************
