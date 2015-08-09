@@ -1,7 +1,7 @@
-// **************************************************************
+// ********************************************************************************************************************
 // Test designs for a peristaltic pump
 // Looking to make the repeated curved shape work easier via openscad
-// **************************************************************
+// ********************************************************************************************************************
 
 // --------------------------------------------------------------------------------------------------------------------
 // Hardware Settings 
@@ -22,32 +22,28 @@ DriveNutHeight = 2.3;
 			
 FrameBoltCircumference = 4.1;				// SAE 8-32 Bolt
 
-FrameNutCircumference = 9.7;					// 8-32 nlyoc nut
+FrameNutCircumference = 9.7;				// 8-32 nlyoc nut
 FrameNutHeight = 6.4;					
 
 // --------------------------------------------------------------------------------------------------------------------
 // Design Settings 
 // --------------------------------------------------------------------------------------------------------------------
 
-// -- Stator Reference Values for the test
+// -- Rotor Reference Values for the test
 
-StatorCircumference = 62;               // 
-StatorHeight = 30;
+RotorRollerDiameter = 32;				// Diameter from center to the outer roller edge
+RotorRollerHeight = 14;					// Height of rollers (2x 608zz bearings)
 
-StatorFrameCircumference = 45;
-StatorFrameHeight = 30;             
+RotorFrameDiameter = 25;				// Diameter from center to outer frame edge
+RotorFrameHeight = 28;					// Height of the rotor frame - includes roller mounting hardware
 
-StatorClearanceCircumference = 55;
-
-StatorClearanceSpacing = 2;
+RotorClearanceSpacing = 2;				// Extra spacing to be added to provide clearance
 
 // -- Frame Reference Values
 
 FaceHeight = 3;
 
-// -- Height of pump housing
-
-HousingHeight = FaceHeight + StatorClearanceSpacing + (StatorFrameHeight/2);
+HousingOuterFrameThickness = 4;
 
 
 // -- Hose Reference Values
@@ -68,31 +64,70 @@ EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 // Rendering Settings
 // --------------------------------------------------------------------------------------------------------------------
 
+DefaultConvexity = 10;
+DefaultSegments = 64;
+
 ShowHardware=true;
 ShowHose=true;
+ShowReferenceSTL=false;
 
-// **************************************************************
+// ********************************************************************************************************************
 
-// Reference casing
+// Reference Housing
 // --------------------------------------------------------------------------------------------------------------------
 
-color([1,1,0])
+if (ShowReferenceSTL == true) {
+	color([1,0.5,0])
 	translate([6.5,0,9.5])
-		import("Casing_Reference.stl", convexity=3);
+	import("Casing_Reference.stl", convexity=DefaultConvexity);
+}
 
-// Test Ring
+// Test Pump Housing
 // --------------------------------------------------------------------------------------------------------------------
 
-rotate_extrude(convexity = 3)
-    translate([StatorCircumference / 2 + HoseCompressedWidth, 0, 0])
-        square([4,HousingHeight],center=false);
+innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
+innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
+innerWallThickness = HousingOuterFrameThickness;
+
+supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
+supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
+supportChannelThickness = innerWallDiameter - supportChannelDiameter;
+
+faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
+faceEdgeHeight = RotorClearanceSpacing;
+faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
+
+// -- Housing - Outer Frame
+// This part forms an inner wall large enough for the hose to be fully compressed by the rollers
+
+rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
+	translate([innerWallDiameter, 0, 0])
+		square([innerWallThickness, innerWallHeight],center=false);
         
-color([1,0,0])
-rotate_extrude(convexity = 3)
-    translate([StatorClearanceCircumference / 2 + HoseCompressedWidth, 0, 0])
-        square([(StatorCircumference - StatorClearanceCircumference)/2, HousingHeight - (StatorFrameHeight/2)],center=false);
+// -- Housing - Support for tubing      
+// This part creates a channel to contain the hose whilst providing clearance for the rotor assembly
+// Two squares with a circle at the edge provide a rounded camber 
+
+rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
+	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), 0, 0])
+		square([supportChannelThickness, supportChannelHeight],center=false);
+	
+rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
+	translate([supportChannelDiameter, 0, 0])
+		square([supportChannelThickness, supportChannelHeight - (RotorClearanceSpacing / 2)],center=false);
+			
+translate([0,0,supportChannelHeight - (RotorClearanceSpacing / 2)]) {
+	rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) 
+        translate([supportChannelDiameter + (RotorClearanceSpacing / 2), 0, 0])
+        	circle(d = RotorClearanceSpacing, $fn= DefaultSegments, center=false);
+}
+       	
+// -- Housing - Facing
+
+rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments) translate([faceEdgeDiameter, 0, 0])
+	square([faceEdgeThickness, faceEdgeHeight],center=false); 
         
-color([0,0,1])
-rotate_extrude(convexity = 3)
-    translate([StatorFrameCircumference / 2 + HoseCompressedWidth, 0, 0])
-        square([(StatorClearanceCircumference - StatorFrameCircumference) / 2,FaceHeight],center=false); 
+        
+        
+// ********************************************************************************************************************
+// ********************************************************************************************************************
