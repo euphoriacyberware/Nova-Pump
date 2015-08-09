@@ -76,9 +76,9 @@ ShowHose=true;
 // Reference casing
 // --------------------------------------------------------------------------------------------------------------------
 
-/*color([1,1,0])
+color([1,1,0])
 	translate([6.5,0,9.5])
-		import("Casing_Reference.stl", convexity=3);*/
+		import("Casing_Reference.stl", convexity=3);
 
 // Test Ring
 // --------------------------------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ rotate_extrude(convexity = 3)
 color([1,0,0])
 rotate_extrude(convexity = 3)
     translate([StatorClearanceCircumference / 2 + HoseCompressedWidth, 0, 0])
-        square([(StatorCircumference - StatorClearanceCircumference)/2, StatorClearanceSpacing + (StatorFrameHeight / 2)],center=false);
+        square([(StatorCircumference - StatorClearanceCircumference)/2, HousingHeight - (StatorFrameHeight/2)],center=false);
         
 color([0,0,1])
 rotate_extrude(convexity = 3)
