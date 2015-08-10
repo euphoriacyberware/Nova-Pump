@@ -259,21 +259,27 @@ module housing_UpperPart() {
 	}
 }
 
+module housing_CenterExtrude() {
+	rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+				housingProfile_Main();
+				
+		translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+		cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight - faceEdgeHeight));
+	translate([innerWallDiameter - HoseDiameter, innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+		cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight - faceEdgeHeight));
+}
+
 module housing_CenterRing() {
 		// center ring part
 	intersection() {	// creates the main housing profile
-		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
-				housingProfile_Main();
+		housing_CenterExtrude();
 		translate([0,0,innerWallHeight])	
 			cube(size=[(innerWallDiameter + innerWallThickness) * 3, (innerWallDiameter + innerWallThickness) * 3, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
 	}
 	
-	translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
-        rotate([90,0,0])
-		cylinder(h= innerWallDiameter + innerWallThickness, r=(innerWallHeight - supportChannelHeight - faceEdgeHeight));
-	translate([innerWallDiameter - HoseDiameter, innerWallDiameter, innerWallHeight])
-        rotate([90,0,0])
-		cylinder(h= innerWallDiameter + innerWallThickness, r=(innerWallHeight - supportChannelHeight - faceEdgeHeight));
+
 }
 
 module housing_CenterPart() {
