@@ -95,13 +95,11 @@ if (ShowReferenceSTL == true) {
 	import("Casing_Reference.stl", convexity=DefaultConvexity);
 }
 
+
+
 difference() {
-    housing_LowerComponent();
-    
-    translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
-        rotate([90,0,0])
-        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
-    
+	housing_CenterPart();
+        
     // tubing test
     color([0,1,1])
     translate([innerWallDiameter - HoseDiameter, innerWallDiameter, innerWallHeight])
@@ -113,6 +111,10 @@ difference() {
         rotate([90,0,0])
         cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
 }
+
+
+//housing_LowerPart();
+//housing_UpperPart();
 
 /*difference() {
     
@@ -170,10 +172,10 @@ module housing_LowerComponent() {
 
 module housingProfile_SupportChannel(_SupportChannelHeight = supportChannelHeight) {
 
-	// main support
+	// lower main support
 	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), 0, 0])
 		square([supportChannelThickness - RotorClearanceSpacing, supportChannelHeight],center=false);
-	
+			
 	// lower portion of main support
 	translate([supportChannelDiameter, 0, 0])
 		square([RotorClearanceSpacing, supportChannelHeight - (RotorClearanceSpacing / 2)],center=false);
@@ -221,7 +223,7 @@ module housingProfile_InnerEdge() {
 // Main Profile rendering module
 // --------------------------------------------------------------------------------------------------------------------
 
-module housingProfile_Main() {
+module housing_LowerProfile() {
 	// Render Sections of profile
 	
 	housingProfile_SupportChannel(supportChannelDiameter);
@@ -229,12 +231,57 @@ module housingProfile_Main() {
 	housingProfile_InnerEdge();
 }
 
-module housingProfile_HoseSide() {
-	// Render Sections of profile
+module housingProfile_Main() {
+	housing_LowerProfile();
 	
-	housingProfile_SupportChannel();
-	housingProfile_OuterFrame();
-	housingProfile_InnerEdge();
+	translate([0,innerWallHeight * 2,0])
+		rotate([0,180,180])
+			housing_LowerProfile();
+}
+
+module housing_LowerPart() {
+	// lower ring part
+	intersection() {	// creates the main housing profile
+		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+					housingProfile_Main();
+		translate([0,0,(supportChannelHeight + faceEdgeHeight) /2])	
+			cube(size=[(innerWallDiameter + innerWallThickness) * 3, (innerWallDiameter + innerWallThickness) * 3, supportChannelHeight + faceEdgeHeight], center=true);
+	}
+}
+
+module housing_UpperPart() {
+	// upper ring part
+	intersection() {	// creates the main housing profile
+		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+					housingProfile_Main();
+		translate([0,0,innerWallHeight * 2 - (supportChannelHeight + faceEdgeHeight) /2])	
+			cube(size=[(innerWallDiameter + innerWallThickness) * 3, (innerWallDiameter + innerWallThickness) * 3, supportChannelHeight + faceEdgeHeight], center=true);
+	}
+}
+
+module housing_CenterRing() {
+		// center ring part
+	intersection() {	// creates the main housing profile
+		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+				housingProfile_Main();
+		translate([0,0,innerWallHeight])	
+			cube(size=[(innerWallDiameter + innerWallThickness) * 3, (innerWallDiameter + innerWallThickness) * 3, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
+	}
+	
+	translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+		cylinder(h= innerWallDiameter + innerWallThickness, r=(innerWallHeight - supportChannelHeight - faceEdgeHeight));
+	translate([innerWallDiameter - HoseDiameter, innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+		cylinder(h= innerWallDiameter + innerWallThickness, r=(innerWallHeight - supportChannelHeight - faceEdgeHeight));
+}
+
+module housing_CenterPart() {
+	difference() {
+		housing_CenterRing();
+		cylinder(h = innerWallHeight *2, r=innerWallDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+	}
+
 }
         
         
