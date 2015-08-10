@@ -3,8 +3,6 @@
 // Looking to make the repeated curved shape work easier via openscad
 // ********************************************************************************************************************
 
-include <partial_rotate_extrude.scad>;
-
 // --------------------------------------------------------------------------------------------------------------------
 // Hardware Settings 
 // --------------------------------------------------------------------------------------------------------------------
@@ -68,7 +66,7 @@ EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 // --------------------------------------------------------------------------------------------------------------------
 
 DefaultConvexity = 10;
-DefaultSegments = 24;
+DefaultSegments = 96;
 
 ShowHardware=true;
 ShowHose=true;
@@ -79,17 +77,58 @@ ShowReferenceSTL=false;
 // Reference Housing
 // --------------------------------------------------------------------------------------------------------------------
 
+innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
+innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
+innerWallThickness = HousingOuterFrameThickness;
+
+supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
+supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
+supportChannelThickness = innerWallDiameter - supportChannelDiameter;
+
+faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
+faceEdgeHeight = RotorClearanceSpacing;
+faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
+
 if (ShowReferenceSTL == true) {
 	color([1,0.5,0])
 	translate([6.5,0,9.5])
 	import("Casing_Reference.stl", convexity=DefaultConvexity);
 }
 
-housing_LowerComponent();
+difference() {
+    housing_LowerComponent();
+    
+    translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
+    
+    // tubing test
+    color([0,1,1])
+    translate([innerWallDiameter - HoseDiameter, innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
 
-color([0,1,1])
-translate([0, innerWallDiameter, 0])
-cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
+    color([0,1,1])
+    translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
+}
+
+/*difference() {
+    
+    color([0,1,1])
+    translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);   
+    
+    // tubing test
+    color([0,1,1])
+    translate([innerWallDiameter - HoseDiameter, innerWallDiameter, innerWallHeight])
+        rotate([90,0,0])
+        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
+
+
+}*/
 
 module housing_LowerComponent() {
 	intersection() {
@@ -103,10 +142,18 @@ module housing_LowerComponent() {
 	intersection() {
 		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
 			housingProfile_HoseSide();
-
+        
+        
 		translate([0, 0 - (innerWallDiameter + innerWallThickness), 0])
 			cube(size=[innerWallDiameter + innerWallThickness, (innerWallDiameter + innerWallThickness) * 2, innerWallHeight], center = false);
 	}
+    
+    /*intersection() {
+    rotate([0,0,270])
+    translate([0 - (innerWallDiameter + innerWallThickness), 0 - (innerWallDiameter + innerWallThickness), 0])
+			cube(size=[innerWallDiameter + innerWallThickness, (innerWallDiameter + innerWallThickness) * 2, innerWallHeight], center = false);
+        housingProfile_SupportChannel();
+    }*/
 }
 
 
@@ -114,17 +161,7 @@ module housing_LowerComponent() {
 // Pump housing
 // ====================================================================================================================
 
-innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
-innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
-innerWallThickness = HousingOuterFrameThickness;
 
-supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
-supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
-supportChannelThickness = innerWallDiameter - supportChannelDiameter;
-
-faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
-faceEdgeHeight = RotorClearanceSpacing;
-faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
 
 // Support Channel
 // --------------------------------------------------------------------------------------------------------------------
