@@ -66,7 +66,7 @@ EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 // --------------------------------------------------------------------------------------------------------------------
 
 DefaultConvexity = 16;
-DefaultSegments = 24;
+DefaultSegments = 64;
 
 ShowHardware=true;
 ShowHose=true;
@@ -94,6 +94,9 @@ if (ShowReferenceSTL == true) {
 	import("Casing_Reference.stl", convexity=DefaultConvexity);
 }
 
+
+housingComplete();
+
 // Slice for bottom part only
 /*difference() {
 	// render complete housing part (all parts combined)
@@ -109,13 +112,14 @@ if (ShowReferenceSTL == true) {
 }*/
 
 // Slice for hose insert part only
-intersection() {
+
+/*intersection() {
 	// render complete housing part (all parts combined)
 	housingComplete();
 	// slice out hose insert
 	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
 			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
-}
+}*/
 
 
 
@@ -126,25 +130,79 @@ intersection() {
 module housingComplete() {
 	hoseTubeOffset = 0;
 	hoseTubeLength = innerWallDiameter + innerWallThickness + 3.5;
-	union() {
-		difference() {
-			housing_CenterPart();
+	
+	difference() {
+		union() {
+			difference() {
+				housing_CenterPart();
 		
-			// tubing test
-			color([0,1,1])
-			translate([innerWallDiameter - HoseDiameter, hoseTubeLength + hoseTubeOffset, innerWallHeight])
-				rotate([90,0,0])
-				cylinder(h = hoseTubeLength, r=HoseDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+				// tubing test
+				color([0,1,1])
+				translate([innerWallDiameter - HoseDiameter, hoseTubeLength + hoseTubeOffset, innerWallHeight])
+					rotate([90,0,0])
+					cylinder(h = hoseTubeLength, r=HoseDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
 
-			color([0,1,1])
-			translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + hoseTubeOffset, innerWallHeight])
-				rotate([90,0,0])
-				cylinder(h = hoseTubeLength, r=HoseDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+				color([0,1,1])
+				translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + hoseTubeOffset, innerWallHeight])
+					rotate([90,0,0])
+					cylinder(h = hoseTubeLength, r=HoseDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+			}
+
+
+			housing_LowerPart();
+			housing_UpperPart();
+		
+			difference() {
+		
+				union() {
+				
+				
+				// bolt holder
+				rotate([0,0,30])
+				translate([0,-(innerWallDiameter + innerWallThickness),0])
+				cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+				
+				// bolt holder
+				rotate([0,0,150])
+				translate([0,-(innerWallDiameter + innerWallThickness),0])
+				cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+				
+								// bolt holder
+				rotate([0,0,-30])
+				translate([0,-(innerWallDiameter + innerWallThickness),0])
+				cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+				
+				// bolt holder
+				rotate([0,0,-150])
+				translate([0,-(innerWallDiameter + innerWallThickness),0])
+				cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+				}	
+
+				// slice out center of support channel
+				cylinder(h = innerWallHeight *2, r=innerWallDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+		
+			}
 		}
-
-
-		housing_LowerPart();
-		housing_UpperPart();
+		
+		// bolt hole
+		rotate([0,0,30])
+		translate([0,-(innerWallDiameter + innerWallThickness),0])
+			cylinder(h=38, r=FrameBoltCircumference/2);
+			
+		// bolt hole
+		rotate([0,0,150])
+		translate([0,-(innerWallDiameter + innerWallThickness),0])
+			cylinder(h=38, r=FrameBoltCircumference/2);
+			
+		// bolt hole
+		rotate([0,0,-30])
+		translate([0,-(innerWallDiameter + innerWallThickness),0])
+			cylinder(h=38, r=FrameBoltCircumference/2);
+			
+		// bolt hole
+		rotate([0,0,-150])
+		translate([0,-(innerWallDiameter + innerWallThickness),0])
+			cylinder(h=38, r=FrameBoltCircumference/2);
 	}
 }
 
@@ -283,6 +341,8 @@ module housingProfile_Main() {
 			housing_LowerProfile();
 }
 
+// --------------------------------------------------------------------------------------------------------------------
+
 module housing_LowerPart() {
 	// lower ring part
 	intersection() {	// creates the main housing profile
@@ -292,6 +352,8 @@ module housing_LowerPart() {
 			cube(size=[(innerWallDiameter + innerWallThickness) * 3, (innerWallDiameter + innerWallThickness) * 3, supportChannelHeight + faceEdgeHeight], center=true);
 	}
 }
+
+// --------------------------------------------------------------------------------------------------------------------
 
 module housing_UpperPart() {
 	// upper ring part
@@ -303,6 +365,8 @@ module housing_UpperPart() {
 	}
 }
 
+// --------------------------------------------------------------------------------------------------------------------
+
 module housing_CenterExtrude() {
 	hoseTubeOffset = 0;
 	hoseTubeLength = innerWallDiameter + innerWallThickness;
@@ -310,12 +374,15 @@ module housing_CenterExtrude() {
 	rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
 				housingProfile_Main();
 				
+	// hose channels
 	translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + 2.5 , innerWallHeight])
         rotate([90,0,0])
 			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments);
 	translate([innerWallDiameter - HoseDiameter, hoseTubeLength + 2.5, innerWallHeight])
         rotate([90,0,0])
 			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments);
+	
+	// solid base of hose channels
 	translate([0, hoseTubeLength / 2 + 1.25, innerWallHeight])	
 			cube(size=[(innerWallDiameter ) *2, (innerWallDiameter + innerWallThickness) + 2.5, (supportChannelHeight * 2) - RotorClearanceSpacing], center=true);
 
