@@ -66,7 +66,7 @@ EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 // --------------------------------------------------------------------------------------------------------------------
 
 DefaultConvexity = 16;
-DefaultSegments = 240;
+DefaultSegments = 24;
 
 ShowHardware=true;
 ShowHose=true;
@@ -95,7 +95,7 @@ if (ShowReferenceSTL == true) {
 }
 
 // Slice for bottom part only
-difference() {
+/*difference() {
 	// render complete housing part (all parts combined)
 	housingComplete();
 	
@@ -105,9 +105,17 @@ difference() {
 	
 	// slice out hose insert
 	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
-			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (supportChannelHeight * 2) - RotorClearanceSpacing], center=true);
-}
+			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
+}*/
 
+// Slice for hose insert part only
+intersection() {
+	// render complete housing part (all parts combined)
+	housingComplete();
+	// slice out hose insert
+	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
+			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
+}
 
 
 
