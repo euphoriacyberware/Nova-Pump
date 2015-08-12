@@ -21,7 +21,7 @@ DriveNutHeight = 2.3;
 // -- Bolts used for securing two sides of housing together
 			
 FrameBoltCircumference = 4.1;				// SAE 8-32 Bolt
-
+FrameBoltHeadCircumference = 7.4;
 FrameNutCircumference = 9.7;				// 8-32 nlyoc nut
 FrameNutHeight = 6.4;					
 
@@ -59,13 +59,13 @@ HoseCompressedHeight = 16;					// Height of hose when compressed
 
 // Settings to compensate for inaccuracies produced from using FFM techniques
 
-EdgeAdjustment = 0.0;				// Adjust to match the printing nozzle
+EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 
 // --------------------------------------------------------------------------------------------------------------------
 // Rendering Settings
 // --------------------------------------------------------------------------------------------------------------------
 
-DefaultConvexity = 16;
+DefaultConvexity = 8;
 DefaultSegments = 32;
 
 ShowHardware=true;
@@ -76,15 +76,15 @@ ShowReferenceSTL=false;
 // Pump Housing
 // --------------------------------------------------------------------------------------------------------------------
 
-innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth + (EdgeAdjustment / 2);
+innerWallDiameter = RotorRollerDiameter + HoseCompressedWidth;
 innerWallHeight = (RotorFrameHeight / 2) + RotorClearanceSpacing + FaceHeight;
 innerWallThickness = HousingOuterFrameThickness;
 
-supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing  + (EdgeAdjustment / 2);
+supportChannelDiameter = RotorFrameDiameter + RotorClearanceSpacing;
 supportChannelHeight = innerWallHeight - (RotorRollerHeight / 2) - RotorClearanceSpacing;
 supportChannelThickness = innerWallDiameter - supportChannelDiameter;
 
-faceEdgeDiameter = RotorFrameDiameter + (EdgeAdjustment / 2);
+faceEdgeDiameter = RotorFrameDiameter;
 faceEdgeHeight = RotorClearanceSpacing;
 faceEdgeThickness = supportChannelDiameter - faceEdgeDiameter;
 
@@ -94,8 +94,11 @@ if (ShowReferenceSTL == true) {
 	import("Casing_Reference.stl", convexity=DefaultConvexity);
 }
 
+//housingProfile_Main();
 
 housingComplete();
+
+
 
 // Slice for bottom part only
 /*difference() {
@@ -109,8 +112,8 @@ housingComplete();
 	// slice out hose insert
 	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
 			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
-}
-*/
+}*/
+
 // Slice for hose insert part only
 
 /*intersection() {
@@ -155,104 +158,112 @@ module housingComplete() {
 			difference() {
 				union() {
 					// bolt holder
-					rotate([0,0,30])
+					rotate([0,0,45])
 					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-						cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+						cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
 				
 					// bolt holder
 					rotate([0,0,150])
 					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-						cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+						cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
 				
 									// bolt holder
-					rotate([0,0,-30])
+					rotate([0,0,-45])
 					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-						cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+						cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
 				
 					// bolt holder
 					rotate([0,0,-150])
 					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-					cylinder(h=38, r=(FrameNutCircumference/2) + 2);
+					cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
 				}	
 
 				// slice out center of support channel
-				cylinder(h = innerWallHeight *2, r=innerWallDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+				cylinder(h = innerWallHeight *2, r=innerWallDiameter, convexity = DefaultConvexity, $fn = 128);
 			}
 		}
 		
 		// Housing Assembly Bolt Holders (holes)
 		union() {
-			// bolt hole
-			rotate([0,0,30])
-			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-				cylinder(h=38, r=FrameBoltCircumference/2);
+			// bolt hole (A)
+			rotate([0,0,45])
+			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),5])
+				cylinder(h=28, r=(FrameBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
 			
-			// bolt hole
+			// bolt head recess (A)
+			rotate([0,0,45])
+			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
+				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
+
+			// bolt nut recess (A)
+			rotate([0,0,45])
+			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),innerWallHeight * 2])
+				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=6);
+			
+			// bolt hole (B)
+			rotate([0,0,150])
+			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),5])
+				cylinder(h=28, r=(FrameBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
+			
+			// bolt head recess (B)
 			rotate([0,0,150])
 			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-				cylinder(h=38, r=FrameBoltCircumference/2);
+				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
 			
-			// bolt hole
-			rotate([0,0,-30])
+			// bolt hole (C)
+			rotate([0,0,-45])
+			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),5])
+				cylinder(h=28, r=(FrameBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
+			
+			// bolt head recess (C)
+			rotate([0,0,-45])
 			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-				cylinder(h=38, r=FrameBoltCircumference/2);
+				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
 			
-			// bolt hole
+			// bolt hole (D)
+			rotate([0,0,-150])
+			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),5])
+				cylinder(h=28, r=(FrameBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
+				
+			// bolt head recess (D)
 			rotate([0,0,-150])
 			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-				cylinder(h=38, r=FrameBoltCircumference/2);
+				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
+				
+
 		}
 	}
-}
-
-/*difference() {
-    
-    color([0,1,1])
-    translate([0 - (innerWallDiameter - HoseDiameter), innerWallDiameter, innerWallHeight])
-        rotate([90,0,0])
-        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);   
-    
-    // tubing test
-    color([0,1,1])
-    translate([innerWallDiameter - HoseDiameter, innerWallDiameter, innerWallHeight])
-        rotate([90,0,0])
-        cylinder(h = innerWallDiameter + innerWallThickness, r=HoseDiameter);
-
-
-}*/
-
-module housing_LowerComponent() {
-	intersection() {
-		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
-			housingProfile_Main();
-
-		translate([0 - (innerWallDiameter + innerWallThickness), 0 - (innerWallDiameter + innerWallThickness), 0])
-			cube(size=[innerWallDiameter + innerWallThickness, (innerWallDiameter + innerWallThickness) * 2, innerWallHeight], center = false);
-	}
 	
-	intersection() {
-		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
-			housingProfile_HoseSide();
-        
-        
-		translate([0, 0 - (innerWallDiameter + innerWallThickness), 0])
-			cube(size=[innerWallDiameter + innerWallThickness, (innerWallDiameter + innerWallThickness) * 2, innerWallHeight], center = false);
-	}
-    
-    /*intersection() {
-    rotate([0,0,270])
-    translate([0 - (innerWallDiameter + innerWallThickness), 0 - (innerWallDiameter + innerWallThickness), 0])
-			cube(size=[innerWallDiameter + innerWallThickness, (innerWallDiameter + innerWallThickness) * 2, innerWallHeight], center = false);
-        housingProfile_SupportChannel();
-    }*/
-}
+	// bearing support
+	difference() {
+		union() {
+			rotate([0,0,0])
+				housingProfile_ShaftBearingSupport();
+			rotate([0,0,45])
+				housingProfile_ShaftBearingSupport();
+			rotate([0,0,90])
+				housingProfile_ShaftBearingSupport();
+			rotate([0,0,135])
+				housingProfile_ShaftBearingSupport();
+			rotate([0,0,180])
+				housingProfile_ShaftBearingSupport();
+			rotate([0,0,225])
+				housingProfile_ShaftBearingSupport();
+			rotate([0,0,270])
+				housingProfile_ShaftBearingSupport();
+			rotate([0,0,315])
+				housingProfile_ShaftBearingSupport();
+		}
 
+	// slice off bottom edge of cylinders 
+		translate([0,0,0-(innerWallHeight/2)])	
+				cube(size=[(innerWallDiameter + innerWallThickness) *2 + 15, (innerWallDiameter + innerWallThickness) *2 + 15, innerWallHeight], center=true);
+	}
+}
 
 // --------------------------------------------------------------------------------------------------------------------
 // Pump housing
 // ====================================================================================================================
-
-
 
 // Support Channel
 // --------------------------------------------------------------------------------------------------------------------
@@ -261,24 +272,28 @@ module housing_LowerComponent() {
 
 module housingProfile_SupportChannel(_SupportChannelHeight = supportChannelHeight) {
 
+	_curveRadius = 6;
+
 	// lower main support
-	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), 0, 0])
-		square([supportChannelThickness - RotorClearanceSpacing, supportChannelHeight],center=false);
+	color([1,0,0])
+	translate([supportChannelDiameter + (_curveRadius / 2), 0, 0])
+		square([supportChannelThickness - _curveRadius, supportChannelHeight],center=false);
 			
 	// lower portion of main support
+	color([0,0,1])
 	translate([supportChannelDiameter, 0, 0])
-		square([RotorClearanceSpacing, supportChannelHeight - (RotorClearanceSpacing / 2)],center=false);
+		square([_curveRadius, supportChannelHeight - (_curveRadius / 2)],center=false);
 	
 	// outside curved edge for main support	
-	translate([supportChannelDiameter + (RotorClearanceSpacing / 2), supportChannelHeight - (RotorClearanceSpacing / 2), 0])
-		circle(d = RotorClearanceSpacing, $fn= DefaultSegments / 4, center=false);
+	translate([supportChannelDiameter + (_curveRadius / 2), supportChannelHeight - (_curveRadius / 2), 0])
+		circle(d = _curveRadius, $fn=64, center=false);
 	
 	// inner edge between the support channel and the Outer Frame
 	difference() {
-		translate([supportChannelDiameter + supportChannelThickness - (RotorClearanceSpacing / 2), 0, 0])
-			square([RotorClearanceSpacing, supportChannelHeight + (RotorClearanceSpacing / 2)],center=false);
-		translate([supportChannelDiameter + supportChannelThickness - (RotorClearanceSpacing / 2), supportChannelHeight + (RotorClearanceSpacing / 2), 0])
-			circle(d = RotorClearanceSpacing, $fn= DefaultSegments / 4, center=false);
+		translate([supportChannelDiameter + supportChannelThickness - (_curveRadius / 2), 0, 0])
+			square([_curveRadius, supportChannelHeight + (_curveRadius / 2)],center=false);
+		translate([supportChannelDiameter + supportChannelThickness - (_curveRadius / 2), supportChannelHeight + (_curveRadius / 2), 0])
+			circle(d = _curveRadius, $fn =64, center=false);
 	}
 
 }
@@ -309,6 +324,46 @@ module housingProfile_InnerEdge() {
 	}		
 }
 
+// Shaft Bearing Hub
+// --------------------------------------------------------------------------------------------------------------------
+
+module housingProfile_ShaftBearingHub() {
+	// rotor shaft bearing holder hub portion
+	difference() {
+		square([8,4]);
+		
+		union() {
+			translate([5.5 + (EdgeAdjustment / 2),3,0])
+				square([1,1]);
+			translate([0,0,0])
+				square([5.5 + (EdgeAdjustment / 2),4]);
+		}
+	}
+	
+	difference() {
+		translate([8,0,0])
+			circle(d = 8, $fn= 64 / 2);
+			
+		union() {
+			square([8,4]);
+			translate([0,-4,0])
+				square([12,4]);
+		}
+	}
+}
+
+// Shaft Bearing Support
+// --------------------------------------------------------------------------------------------------------------------
+
+module housingProfile_ShaftBearingSupport() {
+	translate([0,-8,0])
+	rotate([90,0,0])
+	linear_extrude(height = innerWallDiameter - 12, center = false, convexity = DefaultConvexity)
+		scale([1.5,1.15,1])	
+		circle($fn=32, d= RotorClearanceSpacing*2);
+}
+
+// --------------------------------------------------------------------------------------------------------------------
 // Main Profile rendering module
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -318,10 +373,13 @@ module housing_LowerProfile() {
 	housingProfile_SupportChannel();
 	housingProfile_OuterFrame();
 	housingProfile_InnerEdge();
+	housingProfile_ShaftBearingHub();
+	
+	// outer curve
 	difference() {
 		translate([innerWallDiameter -4,innerWallHeight,0])
 			scale([1,3,1])
-				circle(d=innerWallHeight, convexity = DefaultConvexity, $fn = DefaultSegments);
+				circle(d=innerWallHeight, convexity = DefaultConvexity, $fn = 128);
 
 		translate([0,-20,0])
 			square([innerWallDiameter,innerWallHeight *4], center=false);
@@ -329,7 +387,7 @@ module housing_LowerProfile() {
 			square([innerWallDiameter,innerWallHeight], center=false);
 		translate([innerWallDiameter -14,innerWallHeight,0])
 			square([innerWallDiameter,innerWallHeight+10], center=false);
-	}
+	}		
 }
 
 module housingProfile_Main() {
@@ -345,7 +403,7 @@ module housingProfile_Main() {
 module housing_LowerPart() {
 	// lower ring part
 	intersection() {	// creates the main housing profile
-		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+		rotate_extrude(convexity = DefaultConvexity, $fn = 128)
 					housingProfile_Main();
 		translate([0,0,(supportChannelHeight + faceEdgeHeight) /2])	
 			cube(size=[(innerWallDiameter + innerWallThickness) * 3, (innerWallDiameter + innerWallThickness) * 3, supportChannelHeight + faceEdgeHeight], center=true);
@@ -357,7 +415,7 @@ module housing_LowerPart() {
 module housing_UpperPart() {
 	// upper ring part
 	intersection() {	// creates the main housing profile
-		rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+		rotate_extrude(convexity = DefaultConvexity, $fn = 128)
 					housingProfile_Main();
 		translate([0,0,innerWallHeight * 2 - (supportChannelHeight + faceEdgeHeight) /2])	
 			cube(size=[(innerWallDiameter + innerWallThickness) * 3, (innerWallDiameter + innerWallThickness) * 3, supportChannelHeight + faceEdgeHeight], center=true);
@@ -370,16 +428,16 @@ module housing_CenterExtrude() {
 	hoseTubeOffset = 0;
 	hoseTubeLength = innerWallDiameter + innerWallThickness;
 
-	rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+	rotate_extrude(convexity = DefaultConvexity, $fn = 128)
 				housingProfile_Main();
 				
 	// hose channels
 	translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + 2.5 , innerWallHeight])
         rotate([90,0,0])
-			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments);
+			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = 128);
 	translate([innerWallDiameter - HoseDiameter, hoseTubeLength + 2.5, innerWallHeight])
         rotate([90,0,0])
-			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments);
+			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = 128);
 	
 	// solid base of hose channels
 	translate([0, hoseTubeLength / 2 + 1.25, innerWallHeight])	
@@ -397,7 +455,7 @@ module housing_CenterPart() {
 			}
 		}
 		// slice out center of support channel
-		cylinder(h = innerWallHeight *2, r=innerWallDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+		cylinder(h = (innerWallHeight * 2), r=innerWallDiameter, convexity = DefaultConvexity, $fn = 128);
 	}
 
 }
