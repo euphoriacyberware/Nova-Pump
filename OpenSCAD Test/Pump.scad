@@ -98,6 +98,19 @@ if (ShowReferenceSTL == true) {
 
 housingComplete();
 
+// Slice for top part only
+/*difference() {
+	// render complete housing part (all parts combined)
+	housingComplete();
+	
+	// slice off bottom portion
+	translate([0,0,(innerWallHeight / 2)])	
+			cube(size=[(innerWallDiameter + innerWallThickness) *2 + 15, (innerWallDiameter + innerWallThickness) *2 + 15, innerWallHeight], center=true);
+	
+	// slice out hose insert
+	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
+			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
+}*/
 
 
 // Slice for bottom part only
@@ -135,7 +148,7 @@ module housingComplete() {
 	hoseTubeLength = innerWallDiameter + innerWallThickness + 3.5;
 	assemblyBoltOffset = 0.9;
 	
-	difference() {
+	//difference() {
 		union() {
 			difference() {
 				housing_CenterPart();
@@ -188,17 +201,17 @@ module housingComplete() {
 			// bolt hole (A)
 			rotate([0,0,45])
 			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),5])
-				cylinder(h=28, r=(FrameBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
+				cylinder(h=27, r=(FrameBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
 			
-			// bolt head recess (A)
+			// bolt nut recess (A)
 			rotate([0,0,45])
 			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
-				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
+				cylinder(h=6, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=6);
 
 			// bolt nut recess (A)
 			rotate([0,0,45])
-			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),innerWallHeight * 2])
-				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=6);
+			translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),(innerWallHeight * 2) - 6])
+				cylinder(h=4, r=(FrameBoltHeadCircumference / 2) + (EdgeAdjustment / 2), $fn=16);
 			
 			// bolt hole (B)
 			rotate([0,0,150])
@@ -232,7 +245,7 @@ module housingComplete() {
 				
 
 		}
-	}
+	//}
 	
 	// bearing support
 	difference() {
@@ -434,10 +447,10 @@ module housing_CenterExtrude() {
 	// hose channels
 	translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + 2.5 , innerWallHeight])
         rotate([90,0,0])
-			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = 128);
+			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = 64);
 	translate([innerWallDiameter - HoseDiameter, hoseTubeLength + 2.5, innerWallHeight])
         rotate([90,0,0])
-			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = 128);
+			cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = 64);
 	
 	// solid base of hose channels
 	translate([0, hoseTubeLength / 2 + 1.25, innerWallHeight])	
