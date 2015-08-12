@@ -66,7 +66,7 @@ EdgeAdjustment = 0.35;				// Adjust to match the printing nozzle
 // --------------------------------------------------------------------------------------------------------------------
 
 DefaultConvexity = 8;
-DefaultSegments = 32;
+DefaultSegments = 64;
 
 ShowHardware=true;
 ShowHose=true;
@@ -146,7 +146,85 @@ housingComplete();
 module housingComplete() {
 	hoseTubeOffset = 0;
 	hoseTubeLength = innerWallDiameter + innerWallThickness + 3.5;
-	assemblyBoltOffset = 0.9;
+	assemblyBoltOffset = 0.8;
+	
+	difference() {
+		// Pump Housing - All parts combined
+		union() {
+			// Main Housing Body
+			rotate_extrude(convexity = DefaultConvexity, $fn = DefaultSegments)
+				housingProfile_Main();
+		
+			// Hose Insert Piece
+			difference() {
+			
+				intersection() {
+				
+					union() {
+						translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + 2.5 , innerWallHeight])
+							rotate([90,0,0])
+								cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments / 2);
+						translate([innerWallDiameter - HoseDiameter, hoseTubeLength + 2.5, innerWallHeight])
+							rotate([90,0,0])
+								cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments / 2);
+	
+						// solid base of hose channels
+						translate([0, hoseTubeLength / 2 + 1.25, innerWallHeight])	
+								cube(size=[(innerWallDiameter ) *2, (innerWallDiameter + innerWallThickness) + 2.5, (supportChannelHeight * 2) - RotorClearanceSpacing], center=true);
+	
+					} // union() - Hose Insert Piece
+				
+					translate([0,0,innerWallHeight])	
+						cube(size=[(innerWallDiameter + innerWallThickness) * 2 + 5, (innerWallDiameter + innerWallThickness) * 2 + 5, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
+				} // intersection() - Hose Insert Piece
+				
+				// Cut out center of support channel
+				cylinder(h = innerWallHeight *2, r=innerWallDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+					
+			} // difference() - Hose Insert Piece
+			
+			
+			// Housing Assembly Bolt Holders 
+			difference() {
+				union() {
+					// bolt holder
+					rotate([0,0,45])
+					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
+						cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
+				
+					// bolt holder
+					rotate([0,0,150])
+					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
+						cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
+				
+									// bolt holder
+					rotate([0,0,-45])
+					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
+						cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
+				
+					// bolt holder
+					rotate([0,0,-150])
+					translate([0,-(innerWallDiameter + innerWallThickness + assemblyBoltOffset),0])
+					cylinder(h=38, r=(FrameNutCircumference/2) + 2, $fn=64);
+				}	
+
+				// cut out center of support channel
+				cylinder(h = innerWallHeight *2, r=innerWallDiameter, convexity = DefaultConvexity, $fn = DefaultSegments);
+			}
+			
+		} // union() - Main Housing Body
+		
+		// cut out tubing holes
+		translate([innerWallDiameter - HoseDiameter, hoseTubeLength + hoseTubeOffset, innerWallHeight])
+			rotate([90,0,0])
+			cylinder(h = hoseTubeLength, r=HoseDiameter, convexity = DefaultConvexity, $fn = DefaultSegments / 2);
+
+		translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + hoseTubeOffset, innerWallHeight])
+		rotate([90,0,0])
+			cylinder(h = hoseTubeLength, r=HoseDiameter, convexity = DefaultConvexity, $fn = DefaultSegments / 2);
+		
+	}
+	/*
 	
 	//difference() {
 		union() {
@@ -271,7 +349,7 @@ module housingComplete() {
 	// slice off bottom edge of cylinders 
 		translate([0,0,0-(innerWallHeight/2)])	
 				cube(size=[(innerWallDiameter + innerWallThickness) *2 + 15, (innerWallDiameter + innerWallThickness) *2 + 15, innerWallHeight], center=true);
-	}
+	}*/
 }
 
 // --------------------------------------------------------------------------------------------------------------------
