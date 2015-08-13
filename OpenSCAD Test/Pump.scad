@@ -275,11 +275,11 @@ module housingComplete() {
 					cylinder(h=innerWallHeight/2, r=(BaseBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=DefaultSegments / 4);
 			
 			// mounting bolt clearance
-			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),FrameNutCircumference*1.5,innerWallHeight/2])
+			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),FrameNutCircumference*1.5,innerWallHeight/4])
 					cylinder(h=innerWallHeight*2, r=(BaseBoltWasherCircumference / 2) + (EdgeAdjustment / 2), $fn=DefaultSegments / 4);
 				
 			// mounting bolt clearance
-			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),-FrameNutCircumference*1.5,innerWallHeight/2])
+			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),-FrameNutCircumference*1.5,innerWallHeight/4])
 					cylinder(h=innerWallHeight*2, r=(BaseBoltWasherCircumference / 2) + (EdgeAdjustment / 2), $fn=DefaultSegments / 4);
 		}
 		rotate([0,0,180])
@@ -290,11 +290,11 @@ module housingComplete() {
 					cylinder(h=innerWallHeight/2, r=(BaseBoltCircumference / 2) + (EdgeAdjustment / 2), $fn=DefaultSegments / 4);
 			
 			// mounting bolt clearance
-			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),FrameNutCircumference*1.5,innerWallHeight/2 -2])
+			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),FrameNutCircumference*1.5,innerWallHeight/4])
 					cylinder(h=innerWallHeight*2, r=(BaseBoltWasherCircumference / 2) + (EdgeAdjustment / 2), $fn=DefaultSegments / 4);
 				
 			// mounting bolt clearance
-			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),-FrameNutCircumference*1.5,innerWallHeight/2 -2])
+			translate([(innerWallDiameter + innerWallThickness + (baseBoltOffset /2)),-FrameNutCircumference*1.5,innerWallHeight/4])
 					cylinder(h=innerWallHeight*2, r=(BaseBoltWasherCircumference / 2) + (EdgeAdjustment / 2), $fn=DefaultSegments / 4);
 		}
 		
@@ -311,8 +311,8 @@ module mountingBoltHolders() {
 			
 			translate([(innerWallDiameter + innerWallThickness - (FrameNutCircumference /2) + (baseBoltOffset /2)),-FrameNutCircumference*1.5,0])
 				cube([FrameNutCircumference + 2,FrameNutCircumference*3,innerWallHeight/2]);
-			
-			translate([(innerWallDiameter + innerWallThickness - (FrameNutCircumference) + (baseBoltOffset /2)) -2,-(FrameNutCircumference*2) - 2,0])
+			color([1,0,0])
+			translate([(innerWallDiameter + innerWallThickness - (FrameNutCircumference) + (baseBoltOffset /2)) -2.1,-(FrameNutCircumference*2) - 2,0])
 				cube([FrameNutCircumference + 2,FrameNutCircumference*4 + 4,innerWallHeight/2]);
 }
 
