@@ -128,7 +128,7 @@ if (ShowReferenceSTL == true) {
 
 
 // Slice for bottom part only
-difference() {
+/*difference() {
 	// render complete housing part (all parts combined)
 	housingComplete();
 	
@@ -139,17 +139,17 @@ difference() {
 	// slice out hose insert
 	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
 			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
-}
+}*/
 
 // Slice for hose insert part only
 
-/*intersection() {
+intersection() {
 	// render complete housing part (all parts combined)
 	housingComplete();
 	// slice out hose insert
 	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
 			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
-}*/
+}
 
 
 
@@ -184,10 +184,10 @@ module housingComplete() {
 					union() {
 						translate([0 - (innerWallDiameter - HoseDiameter), hoseTubeLength + 2.5 , innerWallHeight])
 							rotate([90,0,0])
-								cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments / 2);
+								cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight-1), convexity = DefaultConvexity, $fn = DefaultSegments / 2);
 						translate([innerWallDiameter - HoseDiameter, hoseTubeLength + 2.5, innerWallHeight])
 							rotate([90,0,0])
-								cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight), convexity = DefaultConvexity, $fn = DefaultSegments / 2);
+								cylinder(h= innerWallDiameter + innerWallThickness, r1=(innerWallHeight - supportChannelHeight), r2=(innerWallHeight - supportChannelHeight -1), convexity = DefaultConvexity, $fn = DefaultSegments / 2);
 	
 						// solid base of hose channels
 						translate([0, hoseTubeLength / 2 + 1.25, innerWallHeight])	
