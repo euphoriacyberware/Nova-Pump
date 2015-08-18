@@ -112,7 +112,7 @@ if (ShowReferenceSTL == true) {
 
 
 // Slice for top part only
-/*difference() {
+difference() {
 	// render complete housing part (all parts combined)
 	housingComplete();
 	
@@ -123,7 +123,7 @@ if (ShowReferenceSTL == true) {
 	// slice out hose insert
 	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
 			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
-}*/
+}
 
 
 // Slice for bottom part only
@@ -142,13 +142,13 @@ if (ShowReferenceSTL == true) {
 
 // Slice for hose insert part only
 
-intersection() {
+/*intersection() {
 	// render complete housing part (all parts combined)
 	housingComplete();
 	// slice out hose insert
 	translate([0,(innerWallDiameter + innerWallThickness)/2 + 3.5,innerWallHeight])	
 			cube(size=[(innerWallDiameter + innerWallThickness) *2 +10, (innerWallDiameter + innerWallThickness) + 7, (innerWallHeight - supportChannelHeight - faceEdgeHeight) * 2], center=true);
-}
+}*/
 
 
 
